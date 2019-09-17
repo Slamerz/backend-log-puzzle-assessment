@@ -16,11 +16,20 @@ HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.
 
 """
 
+import argparse
 import os
 import re
 import sys
 import urllib.request
-import argparse
+
+
+def url_sort_key(url):
+    """Used to order the urls in increasing order by 2nd word if present."""
+    match = re.search(r'-(\w+)-(\w+)\.\w+', url)
+    if match:
+        return match.group(2)
+    else:
+        return url
 
 
 def read_urls(filename):
@@ -35,7 +44,7 @@ def read_urls(filename):
     contents = f.read()
     for line in contents.split('\n'):
         results += [url+x for x in re.findall(regex, line)]
-    return sorted(set(results))
+    return sorted(set(results), key=url_sort_key)
 
 
 def download_images(img_urls, dest_dir):
