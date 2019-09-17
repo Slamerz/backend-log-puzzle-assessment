@@ -11,15 +11,15 @@ http://code.google.com/edu/languages/google-python-class/
 
 Given an apache logfile, find the puzzle urls and download the images.
 
-Here's what a puzzle url looks like:
-10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+Here's what a puzzle url looks like: 10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg
+HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 
 """
 
 import os
 import re
 import sys
-import urllib
+import urllib.request
 import argparse
 
 
@@ -28,8 +28,14 @@ def read_urls(filename):
     extracting the hostname from the filename itself.
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
-    # +++your code here+++
-    pass
+    results = []
+    url = 'https://developers.google.com/edu/python'
+    regex = r'\/images.*\.jpg'
+    f = open(filename, 'r')
+    contents = f.read()
+    for line in contents.split('\n'):
+        results += [url+x for x in re.findall(regex, line)]
+    return sorted(set(results))
 
 
 def download_images(img_urls, dest_dir):
@@ -40,8 +46,19 @@ def download_images(img_urls, dest_dir):
     with an img tag to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    os.makedirs(dest_dir, exist_ok=True)
+    f = open('{}index.html'.format(dest_dir), '+w')
+    img_list = ""
+    print("Started downloading {} files".format(len(img_urls)))
+    for index, img in enumerate(img_urls):
+        img_list += '<img src="img{}.jpg"/>\n'.format(index)
+        urllib.request.urlretrieve(img, '{}img{}.jpg'.format(dest_dir, index))
+    print("Finished Downloading {} files".format(len(img_urls)))
+    print("Writing index.html")
+    html = '<html><head></head><body>{}</body></html>'.format(img_list)
+    f.write(html)
+    f.close()
+    print("Created {}index.html".format(dest_dir))
 
 
 def create_parser():
